@@ -8,15 +8,37 @@ import numpy as np
 import argparse
 import shutil as sh
 
+# in order to know where the second minima are
+# opr = {
+#     'cHl3' : [-100,100],
+#     'cHl1' : [-100,100],
+#     'cHq3' : [-100,100],
+#     'cHq1' : [-100,100],
+#     'cll1' : [-100,100],
+#     'cHDD' : [-100,100],
+#     'cHWB' : [-100,100],
+#     'cHW'  : [-100,100],
+#     'cqq11': [-30,30],
+#     'cqq1' : [-30,30],
+#     'cqq31': [-20,20],
+#     'cqq3' : [-20,20],
+#     'cW'   : [-30,30],
+# }
+
 opr = {
-    'cHl3' : [-100,100],
-    'cHq3':  [-100,100],
-    'cll1':  [-100,100],
-    'cqq11': [-30,30],
-    'cqq1' : [-30,30],
-    'cqq31': [-20,20],
-    'cqq3':  [-20,20],
-    'cW':    [-30,30],
+    'cHl3' : [-20,20],
+    'cHl1' : [-100,100],
+    'cHq3' : [-20,20],
+    'cHq1' : [-30,30],
+    'cll1' : [-50,50],
+    'cHDD' : [-60,60],
+    'cHWB' : [-30,30],
+    'cHW'  : [-80,80],
+    'cqq11': [-5,5],
+    'cqq1' : [-5,5],
+    'cqq31': [-5,5],
+    'cqq3' : [-5,5],
+    'cW'   : [-10,10],
 }
 
 def mkdir(path):
@@ -155,8 +177,9 @@ if __name__ == "__main__":
     parser.add_argument('--o',      dest='f_output',  help='Output folder',            required=False, default='Datacard1D')
     parser.add_argument('--op',     dest='op',        help='Operator',                 required=False)
     parser.add_argument('--ignore', dest='ignore',    help='List of ignore variables', required=False, default=',')
+    parser.add_argument('--onlyvar',dest='onlyvar',   help='One variable',             required=False)
     parser.add_argument('--range',  dest='range_op',  help='Range of the scan',        required=False)
-    parser.add_argument('--cuts',   dest='cuts',      help='Cuts',                     required=False)
+    parser.add_argument('--cuts',   dest='cuts',      help='Cuts',                     required=True)
     parser.add_argument('--p',      dest='prefix',    help='Prefix',                   required=False, default='Datacard1D')
     parser.add_argument('--np',     dest='np',        help='npoints for fit',          required=False, default='200')
 
@@ -190,8 +213,8 @@ if __name__ == "__main__":
     inputFolder = os.getcwd() + "/" + f_in
     outputFolder = os.getcwd() + "/" + f_ou
     mkdir(outputFolder)
-    makeActivations(outputFolder, args)
-    makeCondor(outputFolder, args)
+    # makeActivations(outputFolder, args)
+    # makeCondor(outputFolder, args)
     makeSubmit(outputFolder)
     l = open(outputFolder + "/list.txt", 'w')
 
@@ -208,7 +231,10 @@ if __name__ == "__main__":
         mkdir(outputFolder + "/" + args.prefix + "_" + op_)
         for cut_ in cut:
             mkdir(outputFolder + "/" + args.prefix + "_" + op_ + "/" + cut_)
-            var = glob(inputFolder + "/" + cut_ + "/*")
+            if args.onlyvar:
+                var = glob(inputFolder + "/" + cut_ + "/" + args.onlyvar)
+            else:
+                var = glob(inputFolder + "/" + cut_ + "/*")
             for var_ in var:
                 var_ = var_.split(cut_ + "/")[1]
                 if var_ not in ignore:
@@ -216,6 +242,7 @@ if __name__ == "__main__":
                     dst_var = outputFolder + "/" + args.prefix + "_" + op_ + "/" + cut_ + "/" + var_
                     print("[INFO] Running: {}".format(var_,))
                     src = inputFolder + "/" + cut_ + "/" + var_
+                    print(src)
                     os.system("cp -rf " + src + " " + dst)
 
                     l.write('{} {} {} {}\n'.format(dst_var, op_, opr[op_][0], opr[op_][1]))
