@@ -9,6 +9,21 @@ import shutil as sh
 import numpy as np
 from array import array
 
+# RECO EW
+# color1 = ROOT.TColor.GetFreeColorIndex()
+# col1 = ROOT.TColor(color1, 126./255., 46./255., 132./255.)
+# color2 = ROOT.TColor.GetFreeColorIndex()
+# col2 = ROOT.TColor(color2, 209./255., 64./255., 1292/255.)
+
+# # RECO EW+QCD
+# color1 = ROOT.TColor.GetFreeColorIndex()
+# col1 = ROOT.TColor(color1, 0.44213725, 0.05882353, 0.4745098)
+# color2 = ROOT.TColor.GetFreeColorIndex()
+# col2 = ROOT.TColor(color2, 0.44213725, 0.05882353, 0.4745098)
+
+color1 = ROOT.kOrange
+color2 = ROOT.kGreen+1
+
 def mkdir(path):
     try:
         os.mkdir(path)
@@ -17,7 +32,7 @@ def mkdir(path):
 
 def convertName(name):
     d = {
-        "deltaetaWZ" : "#Detlta#eta_{WZ}", 
+        "deltaetaWZ" : "#Delta#eta_{WZ}", 
         "deltaphiWZ" : "#Delta#phi_{WZ}", 
         "Philanes" : "#Phi_{planes}",
         "ThetalW" : "#Theta_{lW}",
@@ -160,7 +175,7 @@ if __name__ == "__main__":
 
         for c in glob(dir + "/*/"):
             cut_ = c.split("/")[-2]
-            print(cut_)
+            # print(cut_)
             if cut_ in ignorecut:
                 print("@ @ @ Skipping Cut {} @ @ @".format(cut_))
                 continue
@@ -175,12 +190,11 @@ if __name__ == "__main__":
             x_counter = 0.5
 
             mkdir(outputFolder + "/" + op + "/" + cut_)
-            if args.saveLL: mkdir(outputFolder + "/" + op + "/" + cut_ + "/LLscans")
 
             for j,vars_ in enumerate(glob(c + "/*/")) :
 
                 var_ = vars_.split("/")[-2]
-                print(var_)
+                # print(var_)
                 if var in ignore:
                     print("@ @ @ Skipping {} @ @ @".format(var_))
                     continue
@@ -193,7 +207,7 @@ if __name__ == "__main__":
                 f = ROOT.TFile(ls_file)
                 t = f.Get("limit")
 
-                print("@Retrieving likelihood...")
+                # print("@Retrieving likelihood...")
                 to_draw = ROOT.TString("2*deltaNLL:{}".format("k_" + op))
                 n = t.Draw( to_draw.Data() , "deltaNLL<{} && deltaNLL>{}".format(float(args.maxNLL),-30), "l")
 
@@ -217,9 +231,9 @@ if __name__ == "__main__":
                 graphScan.SetLineColor(ROOT.kRed)
                 graphScan.SetLineWidth(2)
 
-                print("68 for {}".format(vars_))
+                # print("68 for {}".format(vars_))
                 x_sixeight = getLSintersections(graphScan, 1.0)
-                print("95 for {}".format(vars_))
+                # print("95 for {}".format(vars_))
                 x_nintyfive = getLSintersections(graphScan, 3.84)
 
                 if args.saveLL:
@@ -245,19 +259,34 @@ if __name__ == "__main__":
                     os_ = ROOT.TLatex()
                     os_.SetTextFont(42)
                     os_.SetTextSize(0.035)
-                    os_.DrawLatex(x_sixeight[1]+0.1, 1.05, '68%' )
+                    if x_nintyfive[1] < 0.5:
+                        pos1 = x_sixeight[1]+0.02
+                        pos2 = x_nintyfive[1]+0.01
+                    elif 0.5 < x_nintyfive[1] < 2:
+                        pos1 = x_sixeight[1]+0.15
+                        pos2 = x_nintyfive[1]+0.1
+                    elif 2 < x_nintyfive[1] < 10:
+                        pos1 = x_sixeight[1]+0.6
+                        pos2 = x_nintyfive[1]+0.5
+                    else:
+                        pos1 = x_sixeight[1]+1
+                        pos2 = x_nintyfive[1]+1
+                    os_.DrawLatex(pos1, 1.05, '68%' )
                     ts = ROOT.TLatex()
                     ts.SetTextFont(42)
                     ts.SetTextSize(0.035)
-                    ts.DrawLatex(x_nintyfive[1]+0.1, 3.89, '95%' )
+                    ts.DrawLatex(pos2, 3.89, '95%' )
 
                     if len(x_sixeight) > 2 :
-                        os_.DrawLatex(x_sixeight[3]+0.1, 1.05, '68%' )
+                        os_.DrawLatex(x_sixeight[3]+0.2, 1.05, '68%' )
                     if len(x_nintyfive) > 2 :
-                        ts.DrawLatex(x_nintyfive[3]+0.1, 3.89, '95%' )
+                        ts.DrawLatex(x_nintyfive[3]+0.2, 3.89, '95%' )
 
                     cs.Draw()
-                    cs.Print(outputFolder + "/" + op + "/" + cut_ + "/LLscans/" + op + "_" + var_ + ".png")
+                    cs.Print(outputFolder + "/" + op + "/" + cut_ + "/" + op + "_" + var_ + ".png")
+                    cs.Print(outputFolder + "/" + op + "/" + cut_ + "/" + op + "_" + var_ + ".pdf")
+
+                fitok = 0
 
                 if len(x_sixeight) == 2 and len(x_nintyfive) == 2:
                     one_inf.append(round(abs(x_sixeight[0]),4))
@@ -266,27 +295,31 @@ if __name__ == "__main__":
                     two_sup.append(round(abs(x_nintyfive[1]),4))
 
                 else :
-                    if len(x_sixeight) > 2 and len(x_nintyfive) > 2 :
+                    if 2<len(x_sixeight)<5 and 2<len(x_nintyfive)<5 :
                         one_inf.append([round(x_sixeight[0],4),round(x_sixeight[2],4)])
                         one_sup.append([round(x_sixeight[1],4),round(x_sixeight[3],4)])
                         two_inf.append([round(x_nintyfive[0],4),round(x_nintyfive[2],4)])
                         two_sup.append([round(x_nintyfive[1],4),round(x_nintyfive[3],4)])
-                    elif len(x_sixeight) > 2 and len(x_nintyfive) == 2 :
+                    elif 2<len(x_sixeight)<5 and len(x_nintyfive) == 2 :
                         one_inf.append([round(x_sixeight[0],4),round(x_sixeight[2],4)])
                         one_sup.append([round(x_sixeight[1],4),round(x_sixeight[3],4)])
                         two_inf.append(round(abs(x_nintyfive[0]),4))
                         two_sup.append(round(abs(x_nintyfive[1]),4))
-                    elif len(x_sixeight) == 2 and len(x_nintyfive) > 2 :
+                    elif len(x_sixeight) == 2 and 2<len(x_nintyfive)<5 :
                         one_inf.append(round(abs(x_sixeight[0]),4))
                         one_sup.append(round(abs(x_sixeight[1]),4))
                         two_inf.append([round(x_nintyfive[0],4),round(x_nintyfive[2],4)])
                         two_sup.append([round(x_nintyfive[1],4),round(x_nintyfive[3],4)])
+                    elif len(x_sixeight)>4 or len(x_nintyfive)>4 :
+                        fitok = 1
+                        print("\n@@@ No good fit for Op:{} Cut: {} Var: {} @@@\n".format(op,cut_,var_))
 
-                best_x.append(x_counter)
-                best_y.append(0)
-                var.append(var_)
+                if fitok == 0:
+                    best_x.append(x_counter)
+                    best_y.append(0)
+                    var.append(var_)
 
-                x_counter += 1
+                    x_counter += 1
 
                 f.Close()
 
@@ -348,8 +381,8 @@ if __name__ == "__main__":
 
             g1.SetMinimum(-10)
             g1.SetMaximum(15)
-            g1.SetFillColor(ROOT.kOrange)
-            g1.SetLineColor(ROOT.kOrange)
+            g1.SetFillColor(color1)
+            g1.SetLineColor(color1)
             g1.SetLineWidth(0)
             g1.SetMarkerStyle(24)
             g1.SetMarkerColor(ROOT.kBlue+1)
@@ -358,11 +391,11 @@ if __name__ == "__main__":
 
             g11.SetMinimum(-10)
             g11.SetMaximum(15)
-            g11.SetFillColor(ROOT.kOrange)
-            g11.SetLineColor(ROOT.kOrange)
+            g11.SetFillColor(color1)
+            g11.SetLineColor(color1)
             g11.SetLineWidth(0)
 
-            g2.SetFillColor(ROOT.kGreen+1)
+            g2.SetFillColor(color2)
             g2.SetLineWidth(0)
             g2.SetMarkerStyle(24)
             g2.SetMarkerColor(ROOT.kBlue+1)
@@ -371,8 +404,8 @@ if __name__ == "__main__":
 
             g21.SetMinimum(-10)
             g21.SetMaximum(15)
-            g21.SetFillColor(ROOT.kGreen+1)
-            g21.SetLineColor(ROOT.kGreen+1)
+            g21.SetFillColor(color2)
+            g21.SetLineColor(color2)
             g21.SetLineWidth(0)
 
             leg.AddEntry(g1, "#pm 1#sigma Expected", "F")
@@ -476,6 +509,7 @@ if __name__ == "__main__":
 
             c.Draw()
             c.Print(outputFolder + "/" + op + "/" + cut_ + "/sensitivity_" + op + ".png")
+            c.Print(outputFolder + "/" + op + "/" + cut_ + "/sensitivity_" + op + ".pdf")
 
     f_out = open(outputFolder + "/results.txt", "w")
     for cut in best.keys():
@@ -497,7 +531,7 @@ if __name__ == "__main__":
         two_s = best[cut]["two_s"]
         best_fit = best[cut]["best"]
 
-        two_s, one_s, ops, best_fit, vars_ = zip(*sorted(zip(two_s, one_s, ops, best_fit, vars_)))
+        one_s, two_s, ops, best_fit, vars_ = zip(*sorted(zip(one_s, two_s, ops, best_fit, vars_),reverse=True))
 
          #saving results to txt
         print("[CUT RESULTS] {}".format(cut))
@@ -561,8 +595,8 @@ if __name__ == "__main__":
 
         g1.SetMinimum(-10)
         g1.SetMaximum(15)
-        g1.SetFillColor(ROOT.kOrange)
-        g1.SetLineColor(ROOT.kOrange)
+        g1.SetFillColor(color1)
+        g1.SetLineColor(color1)
         g1.SetLineWidth(0)
         g1.SetMarkerStyle(24)
         g1.SetMarkerColor(ROOT.kBlue+1)
@@ -571,11 +605,11 @@ if __name__ == "__main__":
 
         g11.SetMinimum(-10)
         g11.SetMaximum(15)
-        g11.SetFillColor(ROOT.kOrange)
-        g11.SetLineColor(ROOT.kOrange)
+        g11.SetFillColor(color1)
+        g11.SetLineColor(color1)
         g11.SetLineWidth(0)
 
-        g2.SetFillColor(ROOT.kGreen+1)
+        g2.SetFillColor(color2)
         g2.SetLineWidth(0)
         g2.SetMarkerStyle(24)
         g2.SetMarkerColor(ROOT.kBlue+1)
@@ -584,8 +618,8 @@ if __name__ == "__main__":
 
         g21.SetMinimum(-10)
         g21.SetMaximum(15)
-        g21.SetFillColor(ROOT.kGreen+1)
-        g21.SetLineColor(ROOT.kGreen+1)
+        g21.SetFillColor(color2)
+        g21.SetLineColor(color2)
         g21.SetLineWidth(0)
 
         leg.AddEntry(g1, "#pm 1#sigma Expected", "F")

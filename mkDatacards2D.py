@@ -9,15 +9,75 @@ import argparse
 import shutil as sh
 
 opr = {
-    'cHl3' : [-100,100],
-    'cHq3':  [-100,100],
-    'cll1':  [-100,100],
-    'cqq11': [-50,50],
-    'cqq1' : [-50,50],
-    'cqq31': [-50,50],
-    'cqq3':  [-50,50],
-    'cW':    [-50,50],
+    'cHl3' : [-20,20],
+    'cHq3':  [-20,20],
+    'cHq1':  [-20,20],
+    'cqq11': [-10,10],
+    'cqq1' : [-10,10],
+    'cqq31': [-10,10],
+    'cqq3':  [-10,10],
+    'cW':    [-10,10],
 }
+
+# BSM
+ranges = {
+    'cW_cqq1' :     [[-1,1],[-1,1]],
+    'cW_cqq11' :    [[-1,1],[-1,1]],
+    'cW_cqq3' :     [[-1,1],[-0.5,0.5]],
+    'cW_cqq31' :    [[-1,1],[-0.5,0.5]],
+    'cqq1_cqq11' :  [[-1.5,1.5],[-1.5,1.5]],
+    'cqq1_cqq3' :   [[-1,1],[-0.5,0.5]],
+    'cqq11_cqq31' : [[-1,1],[-0.5,0.5]],
+    'cqq3_cqq31' :  [[-0.7,0.7],[-0.7,0.7]],
+    'cHq3_cW':      [[-3,3],[-1,1]],
+    'cHq3_cqq31' :  [[-3,3],[-1,1]],
+    'cHq3_cqq3' :   [[-3,3],[-1,1]],
+    'cHq3_cqq11' :  [[-3,3],[-1,1]],
+    'cHq3_cqq1' :   [[-3,3],[-1,1]],
+    'cHq1_cW':      [[-6,6],[-1,1]],
+    'cHq1_cqq31' :  [[-6,6],[-0.5,0.5]],
+    'cHq1_cqq3' :   [[-6,6],[-0.5,0.5]],
+    'cHq1_cqq11' :  [[-6,6],[-1,1]],
+    'cHq1_cqq1' :   [[-6,6],[-1,1]],
+    'cHq1_cHq3' :   [[-6,6],[-3,3]],
+    'cHl3_cW':      [[-30,30],[-1.5,1.5]],
+    'cHl3_cqq31' :  [[-30,30],[-1.5,1.5]],
+    'cHl3_cqq3' :   [[-30,30],[-1.5,1.5]],
+    'cHl3_cqq11' :  [[-30,30],[-2,2]],
+    'cHl3_cqq1' :   [[-30,30],[-2,2]],
+    'cHl3_cHq3' :   [[-200,200],[-50,50]],
+    'cHl3_cHq1' :   [[-200,200],[-200,200]]
+}
+
+# # BSM QCD
+# ranges = {
+#     'cW_cqq1' :     [[-1,1],[-1,1]],
+#     'cW_cqq11' :    [[-1,1],[-1,1]],
+#     'cW_cqq3' :     [[-1,1],[-0.5,0.5]],
+#     'cW_cqq31' :    [[-1,1],[-0.5,0.5]],
+#     'cqq1_cqq11' :  [[-1.5,1.5],[-1.5,1.5]],
+#     'cqq1_cqq3' :   [[-2.5,2.5],[-1.5,1.5]],
+#     'cqq11_cqq31' : [[-3,3],[-1.5,1.5]],
+#     'cqq3_cqq31' :  [[-0.5,1.5],[-0.5,1.5]],
+#     'cHq3_cW':      [[-2.5,1],[-1,1]],
+#     'cHq3_cqq31' :  [[-2.5,1],[-1,1]],
+#     'cHq3_cqq3' :   [[-2.5,1],[-1,1]],
+#     'cHq3_cqq11' :  [[-2.5,1],[-1,1]],
+#     'cHq3_cqq1' :   [[-2.5,1],[-1,1]],
+#     'cHq1_cW':      [[-10,10],[-1.5,1]],
+#     'cHq1_cqq31' :  [[-8,8],[-1,1]],
+#     'cHq1_cqq3' :   [[-8,8],[-1,1]],
+#     'cHq1_cqq11' :  [[-9,9],[-1,1]],
+#     'cHq1_cqq1' :   [[-9,9],[-1,1]],
+#     'cHq1_cHq3' :   [[-10,10],[-10,10]],
+#     'cHl3_cW':      [[-20,60],[-15,2]],
+#     'cHl3_cqq31' :  [[-5,40],[-3,1]],
+#     'cHl3_cqq3' :   [[-5,40],[-3,1]],
+#     'cHl3_cqq11' :  [[-8,40],[-10,1]],
+#     'cHl3_cqq1' :   [[-8,40],[-10,1]],
+#     'cHl3_cHq3' :   [[-10,10],[-10,10]],
+#     'cHl3_cHq1' :   [[-10,10],[-10,10]]
+# }
 
 def mkdir(path):
     try:
@@ -157,10 +217,11 @@ if __name__ == "__main__":
     parser.add_argument('--o',      dest='f_output',  help='Output folder',            required=False, default='Datacard2D')
     parser.add_argument('--op',     dest='op',        help='Operator',                 required=False)
     parser.add_argument('--ignore', dest='ignore',    help='List of ignore variables', required=False, default=',')
+    parser.add_argument('--onlyvar',dest='onlyvar',   help='One variable',             required=False)
     parser.add_argument('--range',  dest='range_op',  help='Range of the scan',        required=False)
     parser.add_argument('--cuts',   dest='cuts',      help='Cuts',                     required=False)
     parser.add_argument('--p',      dest='prefix',    help='Prefix',                   required=False, default='Datacard2D')
-    parser.add_argument('--np',     dest='np',        help='npoints for fit',          required=False, default='2000')
+    parser.add_argument('--np',     dest='np',        help='npoints for fit',          required=False, default='20000')
 
     args = parser.parse_args()
     ignore = args.ignore.split(",")
@@ -186,10 +247,11 @@ if __name__ == "__main__":
             if op1 != op0:
                 c = [op0,op1]
                 c.sort()
-                if "{}_{}".format(c[0],c[1]) not in couples.keys():
+                if "{}_{}".format(c[0],c[1]) not in couples.keys() and "{}_{}".format(c[0],c[1]) not in ["cqq1_cqq31","cqq11_cqq3"]: 
                     c_range.append([opr[c[0]][0],opr[c[0]][1]])
                     c_range.append([opr[c[1]][0],opr[c[1]][1]])
-                    couples["{}_{}".format(c[0],c[1])] = c_range
+                    # couples["{}_{}".format(c[0],c[1])] = c_range
+                    couples["{}_{}".format(c[0],c[1])] = ranges["{}_{}".format(c[0],c[1])]
 
     cut = []
     if args.cuts:
@@ -204,8 +266,8 @@ if __name__ == "__main__":
     inputFolder = os.getcwd() + "/" + f_in
     outputFolder = os.getcwd() + "/" + f_ou
     mkdir(outputFolder)
-    makeActivations(outputFolder, args)
-    makeCondor(outputFolder, args)
+    #makeActivations(outputFolder, args)
+    #makeCondor(outputFolder, args)
     makeSubmit(outputFolder)
     l = open(outputFolder + "/list.txt", 'w')
 
@@ -224,7 +286,11 @@ if __name__ == "__main__":
         for cut_ in cut:
             print("[INFO] Cut: {}".format(cut_))
             mkdir(outputFolder + "/" + args.prefix + "_" + c_ + "/" + cut_)
-            var = glob(inputFolder + "/" + cut_ + "/*")
+            var = []
+            if args.onlyvar:
+                var = glob(inputFolder + "/" + cut_ + "/" + args.onlyvar)
+            else:
+                var = glob(inputFolder + "/" + cut_ + "/*")
             for var_ in var:
                 var_ = var_.split(cut_ + "/")[1]
                 if var_ not in ignore:
@@ -234,7 +300,8 @@ if __name__ == "__main__":
                     src = inputFolder + "/" + cut_ + "/" + var_
                     os.system("cp -rf " + src + " " + dst)
 
-                    l.write('{} {} {} {} {} {} {}\n'.format(dst_var, ops[0], ops[1], opr[ops[0]][0], opr[ops[0]][1], opr[ops[1]][0], opr[ops[1]][1]))
+                    # l.write('{} {} {} {} {} {} {}\n'.format(dst_var, ops[0], ops[1], opr[ops[0]][0], opr[ops[0]][1], opr[ops[1]][0], opr[ops[1]][1]))
+                    l.write('{} {} {} {} {} {} {}\n'.format(dst_var, ops[0], ops[1], ranges[c_][0][0], ranges[c_][0][1], ranges[c_][1][0], ranges[c_][1][1]))
 
     l.close()
 

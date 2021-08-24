@@ -90,15 +90,26 @@ if __name__ == "__main__":
     ops = []
     limits = {}
     best = {}
+    # cuts = []
+    # for cuts_ in glob(args.f_input + "/*/*/"):
+    #     cuts.append(cuts_.split("/")[-2])
+    cuts = ["SR_3l"]
 
-    for cut_ in glob(args.f_input + "/*/*/"):
-        cut = cut_.split("/")[-2]
+    for cut in cuts:
         best[cut] = {}
         best[cut]["ops"] = []
         best[cut]["best_var"]= []
         best[cut]["one_s"] = []
         best[cut]["two_s"] = []
         best[cut]["best"] = []
+
+    __stops = array('d', [0.00, 1.00])
+    __red = array('d', [1.0, 0.0])
+    __green  = array('d', [1.0, 0.0])
+    __blue  = array('d', [1.0, 1.00])
+
+    ROOT.TColor.CreateGradientColorTable(2, __stops,__red, __green, __blue, 50, 0.8)
+    ROOT.gStyle.SetNumberContours(200)
 
     outputFolder = os.getcwd() + "/" + args.f_output
     mkdir(outputFolder)
@@ -117,10 +128,9 @@ if __name__ == "__main__":
         print("{} {}".format(op[0],op[1]))
         print("\n\n")
 
-        mkdir(outputFolder + "/" + couples)
+        # mkdir(outputFolder + "/" + couples)
 
-        for c in glob(dir + "/*/"):
-            cut_ = c.split("/")[-2]
+        for cut_ in cuts:
             print(cut_)
 
             one_inf = []
@@ -132,10 +142,10 @@ if __name__ == "__main__":
             var = []
             x_counter = 0.5
 
-            mkdir(outputFolder + "/" + couples + "/" + cut_)
-            if args.saveLL: mkdir(outputFolder + "/" + couples + "/" + cut_ + "/LLscans")            
+            # mkdir(outputFolder + "/" + couples + "/" + cut_)
+            # if args.saveLL: mkdir(outputFolder + "/" + couples + "/" + cut_ + "/LLscans")            
             
-            for j,vars_ in enumerate(glob(c + "/*/")) :
+            for j,vars_ in enumerate(glob(dir + "/" + cut_ + "/*/")) :
 
                 var_ = vars_.split("/")[-2]
                 print(var_)
@@ -158,7 +168,7 @@ if __name__ == "__main__":
                     print("[ATTENTION] no likelihood for {}".format(vars_))
                     print(np.ndarray((n), 'd', t.GetV2())[1:]) #removing first element (0,0)
                     continue
-                
+
                 x = np.ndarray((n), 'd', t.GetV1())
                 y = np.ndarray((n), 'd', t.GetV2())
                 z_ = np.ndarray((n), 'd', t.GetV3())
@@ -172,6 +182,8 @@ if __name__ == "__main__":
                 graphScan.SetTitle(var_)
                 graphScan.SetLineColor(ROOT.kRed)
                 graphScan.SetLineWidth(2)
+                graphScan.SetNpx(100)
+                graphScan.SetNpy(100)                
 
                 graphScan.GetZaxis().SetRangeUser(0, float(args.maxNLL))
                 graphScan.GetHistogram().GetZaxis().SetRangeUser(0, float(args.maxNLL))
@@ -210,7 +222,11 @@ if __name__ == "__main__":
                     exp.SetMarkerColor(ROOT.kRed)
 
                     conts = ROOT.gROOT.GetListOfSpecials().FindObject("contours")
-                    cont_graphs = [conts.At(i).First() for i in range(2)]
+                    # The following will be cont_graphs =  [ROOT.TList, ROOT.TList]
+                    # wheree 2 is defined by the two levels (2.3, 5.99). Each TList
+                    # contains a bunch of TGraphs corresponding to the isoleveel curves (maybe more than 1)
+                    cont_graphs = [conts.At(i) for i in range(len(conts))]
+
                     colors = [ROOT.kRed, ROOT.kRed]
                     linestyle = [1, 7]
 
@@ -229,23 +245,29 @@ if __name__ == "__main__":
                     leg = ROOT.TLegend(0.82, 0.85, 0.67, 0.7)
                     leg.AddEntry(exp, "Best Fit", "P")
 
-                    for i, item in enumerate(cont_graphs):
-                        try:
-                            item.SetLineColor(colors[i])
-                            item.GetXaxis().SetTitle(op[0])
-                            item.GetYaxis().SetTitle(op[1])
-                            item.SetLineStyle(linestyle[i])
-                            item.SetLineWidth(2)
-                            item.Draw("L same")
-                            leg.AddEntry(item, "#pm {}#sigma".format(i+1), "L")
-                        except:
-                            continue
+                    for i, item_ in enumerate(cont_graphs):
+                        # item_ here is a TList
+                        l = list(item_)
+                        for item in l:
+                            try:
+                                item.SetLineColor(colors[i])
+                                item.GetXaxis().SetTitle(op[0])
+                                item.GetYaxis().SetTitle(op[1])
+                                item.SetLineStyle(linestyle[i])
+                                item.SetLineWidth(2)
+                                item.Draw("L same")
+                            except:
+                                continue
+                        #only add one legend entry, arbitrary
+                        if len(l) > 0:
+                            leg.AddEntry(l[0], "#pm {}#sigma".format(i+1), "L")
 
                     exp.Draw("P same")
                     leg.Draw()
 
                     cs.Draw()
-                    cs.Print(outputFolder + "/" + op[0] + "_" + op[1] + "/" + cut_ + "/LLscans/" + op[0] + "_" + op[1] + "_" + var_ + ".png")
+                    cs.Print(outputFolder + "/" + op[0] + "_" + op[1] + "_" + cut_ + "_" + var_ + "_LLscan.png")
+                    cs.Print(outputFolder + "/" + op[0] + "_" + op[1] + "_" + cut_ + "_" + var_ + "_LLscan.pdf")
 
 
                 print("68 for {}".format(vars_))
@@ -370,7 +392,8 @@ if __name__ == "__main__":
             leg.Draw()
 
             c.Draw()
-            c.Print(outputFolder + "/" + op[0] + "_" + op[1] + "/" + cut_ + "/sensitivity_" + op[0] + "_" + op[1] + ".png")
+            c.Print(outputFolder + "/" + op[0] + "_" + op[1] + "_" + cut_ + "_sensitivity.png")
+            c.Print(outputFolder + "/" + op[0] + "_" + op[1] + "_" + cut_ + "_sensitivity.pdf")
     
     #open txt file to store results
     f_out = open(outputFolder + "/results.txt", "w")

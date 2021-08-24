@@ -8,9 +8,27 @@ import plotter.PlotManager as PM
 import numpy as np
 from array import array
 
+# RECO EW
+# color1 = ROOT.TColor.GetFreeColorIndex()
+# col1 = ROOT.TColor(color1, 133./255., 127./255., 173./255.)
+# color2 = ROOT.TColor.GetFreeColorIndex()
+# col2 = ROOT.TColor(color2, 178./255., 177./255., 208./255.)
+
+# # RECO EW+QCD
+# color1 = ROOT.TColor.GetFreeColorIndex()
+# col1 = ROOT.TColor(color1, 0.44213725, 0.05882353, 0.4745098)
+# color2 = ROOT.TColor.GetFreeColorIndex()
+# col2 = ROOT.TColor(color2, 0.44213725, 0.05882353, 0.4745098)
+
+# color1 = ROOT.kOrange
+# color2 = ROOT.kGreen+1
+
+color1 = ROOT.kPink
+color2 = ROOT.kCyan+1
+
 def convertName(name):
     d = {
-        "deltaetaWZ" : "#Detlta#eta_{WZ}", 
+        "deltaetaWZ" : "#Delta#eta_{WZ}", 
         "deltaphiWZ" : "#Delta#phi_{WZ}", 
         "Philanes" : "#Phi_{planes}",
         "ThetalW" : "#Theta_{lW}",
@@ -77,7 +95,8 @@ if __name__ == "__main__":
 
     best = {}
     mod = []
-    mod = ["SR_2e_mu","SR_2mu_e","SR_3e","SR_3l","SR_3mu"]
+    #mod = ["SR_2e_mu","SR_2mu_e","SR_3e","SR_3l","SR_3mu"]
+    mod = ["SR_3l"]
 
     cpm = PM.CombinePlotManager()
     cpm.generateAllBoxes()
@@ -218,8 +237,8 @@ if __name__ == "__main__":
 
         g1.SetMinimum(-10)
         g1.SetMaximum(15)
-        g1.SetFillColor(ROOT.kOrange)
-        g1.SetLineColor(ROOT.kOrange)
+        g1.SetFillColor(color1)
+        g1.SetLineColor(color1)
         g1.SetLineWidth(0)
         g1.SetMarkerStyle(24)
         g1.SetMarkerColor(ROOT.kBlue+1)
@@ -228,11 +247,11 @@ if __name__ == "__main__":
 
         g11.SetMinimum(-10)
         g11.SetMaximum(15)
-        g11.SetFillColor(ROOT.kOrange)
-        g11.SetLineColor(ROOT.kOrange)
+        g11.SetFillColor(color1)
+        g11.SetLineColor(color1)
         g11.SetLineWidth(0)
 
-        g2.SetFillColor(ROOT.kGreen+1)
+        g2.SetFillColor(color2)
         g2.SetLineWidth(0)
         g2.SetMarkerStyle(24)
         g2.SetMarkerColor(ROOT.kBlue+1)
@@ -241,8 +260,8 @@ if __name__ == "__main__":
 
         g21.SetMinimum(-10)
         g21.SetMaximum(15)
-        g21.SetFillColor(ROOT.kGreen+1)
-        g21.SetLineColor(ROOT.kGreen+1)
+        g21.SetFillColor(color2)
+        g21.SetLineColor(color2)
         g21.SetLineWidth(0)
 
         leg.AddEntry(g1, "#pm 1#sigma Expected", "F")
@@ -290,13 +309,29 @@ if __name__ == "__main__":
         for item in cpm.optionals:
             item.Draw("same")
 
+        # if args.drawText:
+        #     count = 0
+        #     for x,t in zip(xs,two_s):
+        #         if type(t[1]) == float:
+        #             y_ = t[1] + 0.3
+        #         else:
+        #             y_ = max(float(t[1][1]),float(t[0][1])) + 0.3
+        #         #do not plot if the text pass the plot boundaries
+        #         if y_ > final_plot_y_max - 0.1: continue
+        #         var = vars_[count]
+        #         count += 1
+        #         latex = ROOT.TLatex()
+        #         latex.SetTextSize(0.025)
+        #         latex.SetTextAlign(12)
+        #         latex.DrawLatex(x-0.14 - 0.02*len(convertName(var)),y_,"{}".format(convertName(var)))
+
         if args.drawText:
             count = 0
             for x,t in zip(xs,two_s):
-                if type(t[1]) == float:
-                    y_ = t[1] + 0.3
+                if type(t[0]) == float:
+                    y_ = t[0] - 0.3
                 else:
-                    y_ = max(float(t[1][1]),float(t[0][1])) + 0.3
+                    y_ = min(float(t[1][0]),float(t[0][0])) - 0.3
                 #do not plot if the text pass the plot boundaries
                 if y_ > final_plot_y_max - 0.1: continue
                 var = vars_[count]
@@ -309,6 +344,7 @@ if __name__ == "__main__":
 
 #        c.Draw()
         c.Print(outputFolder + "/{}_final.png".format(model))
+        c.Print(outputFolder + "/{}_final.pdf".format(model))
 
     f_in.close()
   
