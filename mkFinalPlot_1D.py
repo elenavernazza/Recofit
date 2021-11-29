@@ -9,22 +9,26 @@ import numpy as np
 from array import array
 
 # RECO EW
-# color1 = ROOT.TColor.GetFreeColorIndex()
-# col1 = ROOT.TColor(color1, 133./255., 127./255., 173./255.)
-# color2 = ROOT.TColor.GetFreeColorIndex()
-# col2 = ROOT.TColor(color2, 178./255., 177./255., 208./255.)
+color1 = ROOT.TColor.GetFreeColorIndex()
+col1 = ROOT.TColor(color1, 48./255., 178./255., 26./255.)
+color2 = ROOT.TColor.GetFreeColorIndex()
+col2 = ROOT.TColor(color2, 178./255., 236./255., 93./255.)
+
+color0 = ROOT.kGreen+4
 
 # # RECO EW+QCD
 # color1 = ROOT.TColor.GetFreeColorIndex()
-# col1 = ROOT.TColor(color1, 0.44213725, 0.05882353, 0.4745098)
+# col1 = ROOT.TColor(color1, 255./255., 104./255., 31./255.)
 # color2 = ROOT.TColor.GetFreeColorIndex()
-# col2 = ROOT.TColor(color2, 0.44213725, 0.05882353, 0.4745098)
+# col2 = ROOT.TColor(color2, 248./255., 184./255., 120./255.)
+
+# color0 = ROOT.kRed+2
 
 # color1 = ROOT.kOrange
 # color2 = ROOT.kGreen+1
 
-color1 = ROOT.kPink
-color2 = ROOT.kCyan+1
+# color1 = ROOT.kPink
+# color2 = ROOT.kCyan+1
 
 def convertName(name):
     d = {
@@ -241,7 +245,7 @@ if __name__ == "__main__":
         g1.SetLineColor(color1)
         g1.SetLineWidth(0)
         g1.SetMarkerStyle(24)
-        g1.SetMarkerColor(ROOT.kBlue+1)
+        g1.SetMarkerColor(color0)
         g1.SetMarkerSize(1)
         g1.GetYaxis().SetRangeUser(-10,10)
 
@@ -254,7 +258,7 @@ if __name__ == "__main__":
         g2.SetFillColor(color2)
         g2.SetLineWidth(0)
         g2.SetMarkerStyle(24)
-        g2.SetMarkerColor(ROOT.kBlue+1)
+        g2.SetMarkerColor(color0)
         g2.SetMarkerSize(1)
         g2.GetYaxis().SetRangeUser(-15,15)
 
@@ -309,13 +313,29 @@ if __name__ == "__main__":
         for item in cpm.optionals:
             item.Draw("same")
 
+        if args.drawText:
+            count = 0
+            for x,t in zip(xs,two_s):
+                if type(t[1]) == float:
+                    y_ = t[1] + 0.7
+                else:
+                    y_ = max(float(t[1][1]),float(t[0][1])) + 0.7
+                #do not plot if the text pass the plot boundaries
+                if y_ > final_plot_y_max - 0.1: continue
+                var = vars_[count]
+                count += 1
+                latex = ROOT.TLatex()
+                latex.SetTextSize(0.025)
+                latex.SetTextAlign(12)
+                latex.DrawLatex(x - 0.02*len(convertName(var)),y_,"{}".format(convertName(var)))
+
         # if args.drawText:
         #     count = 0
         #     for x,t in zip(xs,two_s):
-        #         if type(t[1]) == float:
-        #             y_ = t[1] + 0.3
+        #         if type(t[0]) == float:
+        #             y_ = t[0] - 0.3
         #         else:
-        #             y_ = max(float(t[1][1]),float(t[0][1])) + 0.3
+        #             y_ = min(float(t[1][0]),float(t[0][0])) - 0.3
         #         #do not plot if the text pass the plot boundaries
         #         if y_ > final_plot_y_max - 0.1: continue
         #         var = vars_[count]
@@ -324,22 +344,6 @@ if __name__ == "__main__":
         #         latex.SetTextSize(0.025)
         #         latex.SetTextAlign(12)
         #         latex.DrawLatex(x-0.14 - 0.02*len(convertName(var)),y_,"{}".format(convertName(var)))
-
-        if args.drawText:
-            count = 0
-            for x,t in zip(xs,two_s):
-                if type(t[0]) == float:
-                    y_ = t[0] - 0.3
-                else:
-                    y_ = min(float(t[1][0]),float(t[0][0])) - 0.3
-                #do not plot if the text pass the plot boundaries
-                if y_ > final_plot_y_max - 0.1: continue
-                var = vars_[count]
-                count += 1
-                latex = ROOT.TLatex()
-                latex.SetTextSize(0.025)
-                latex.SetTextAlign(12)
-                latex.DrawLatex(x-0.14 - 0.02*len(convertName(var)),y_,"{}".format(convertName(var)))
 
 
 #        c.Draw()

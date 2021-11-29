@@ -30,7 +30,7 @@ class CombinePlotManager:
         self.xtit = "x"
         self.ytit = "y"
         self.NoptUpperleft = 0
-        self.channel = "WZ VBS"
+        self.channel = "W^{#pm}Z+2j"
 
 
 
@@ -86,7 +86,7 @@ class CombinePlotManager:
         self.optionals.append(tex)
 
     def generateTeVBox(self):
-        tex = ROOT.TLatex(0.882,0.905,"(" + str(self.tev) + " TeV)")
+        tex = ROOT.TLatex(0.882,0.915,"(" + str(self.tev) + " TeV)")
         tex.SetNDC()
         tex.SetTextAlign(31)
         tex.SetTextFont(42)
@@ -95,7 +95,7 @@ class CombinePlotManager:
         self.optionals.append(tex)
 
     def generateLumiBox(self):
-        tex = ROOT.TLatex(0.72,0.905, self.lumi)
+        tex = ROOT.TLatex(0.715,0.915, self.lumi)
         tex.SetNDC()
         tex.SetTextAlign(31)
         tex.SetTextFont(42)
@@ -104,7 +104,7 @@ class CombinePlotManager:
         self.optionals.append(tex)
     
     def generateChannelBox(self):
-        tex = ROOT.TLatex(0.4, 0.905, self.channel)
+        tex = ROOT.TLatex(0.4, 0.915, self.channel)
         tex.SetNDC()
         tex.SetTextAlign(31)
         tex.SetTextFont(42)

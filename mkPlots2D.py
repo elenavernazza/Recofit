@@ -3,6 +3,7 @@ import os
 import sys
 import stat
 from glob import glob
+import plotter.PlotManager as PM
 import ROOT
 import numpy as np
 import argparse
@@ -110,6 +111,9 @@ if __name__ == "__main__":
 
     ROOT.TColor.CreateGradientColorTable(2, __stops,__red, __green, __blue, 50, 0.8)
     ROOT.gStyle.SetNumberContours(200)
+
+    cpm = PM.CombinePlotManager()
+    cpm.generateAllBoxes()
 
     outputFolder = os.getcwd() + "/" + args.f_output
     mkdir(outputFolder)
@@ -264,6 +268,9 @@ if __name__ == "__main__":
 
                     exp.Draw("P same")
                     leg.Draw()
+
+                    for item in cpm.optionals:
+                        item.Draw("same")
 
                     cs.Draw()
                     cs.Print(outputFolder + "/" + op[0] + "_" + op[1] + "_" + cut_ + "_" + var_ + "_LLscan.png")

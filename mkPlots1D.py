@@ -4,25 +4,29 @@ import sys
 import stat
 import ROOT
 import argparse
+import plotter.PlotManager as PM
 from glob import glob
 import shutil as sh
 import numpy as np
 from array import array
 
-# RECO EW
+# # RECO EW
 # color1 = ROOT.TColor.GetFreeColorIndex()
-# col1 = ROOT.TColor(color1, 126./255., 46./255., 132./255.)
+# col1 = ROOT.TColor(color1, 48./255., 178./255., 26./255.)
 # color2 = ROOT.TColor.GetFreeColorIndex()
-# col2 = ROOT.TColor(color2, 209./255., 64./255., 1292/255.)
+# col2 = ROOT.TColor(color2, 178./255., 236./255., 93./255.)
+# color0 = ROOT.kGreen+4
 
 # # RECO EW+QCD
 # color1 = ROOT.TColor.GetFreeColorIndex()
-# col1 = ROOT.TColor(color1, 0.44213725, 0.05882353, 0.4745098)
+# col1 = ROOT.TColor(color1, 255./255., 104./255., 31./255.)
 # color2 = ROOT.TColor.GetFreeColorIndex()
-# col2 = ROOT.TColor(color2, 0.44213725, 0.05882353, 0.4745098)
+# col2 = ROOT.TColor(color2, 248./255., 184./255., 120./255.)
+# color0 = ROOT.kRed+2
 
 color1 = ROOT.kOrange
 color2 = ROOT.kGreen+1
+color0 = ROOT.kBlue+1
 
 def mkdir(path):
     try:
@@ -155,6 +159,10 @@ if __name__ == "__main__":
         best[cut]["two_s"] = []
         best[cut]["best"] = []
 
+    cpm = PM.CombinePlotManager()
+
+    cpm.generateAllBoxes()
+
     outputFolder = os.getcwd() + "/" + args.f_output
     mkdir(outputFolder)
 
@@ -227,7 +235,7 @@ if __name__ == "__main__":
                 graphScan = ROOT.TGraph(x.size,x,y)
                 graphScan.GetXaxis().SetTitle(op)
                 graphScan.GetYaxis().SetTitle("-2#DeltaLL")
-                graphScan.SetTitle(var_)
+                graphScan.SetTitle("")
                 graphScan.SetLineColor(ROOT.kRed)
                 graphScan.SetLineWidth(2)
 
@@ -281,6 +289,9 @@ if __name__ == "__main__":
                         os_.DrawLatex(x_sixeight[3]+0.2, 1.05, '68%' )
                     if len(x_nintyfive) > 2 :
                         ts.DrawLatex(x_nintyfive[3]+0.2, 3.89, '95%' )
+
+                    for item in cpm.optionals:
+                        item.Draw("same")
 
                     cs.Draw()
                     cs.Print(outputFolder + "/" + op + "/" + cut_ + "/" + op + "_" + var_ + ".png")
@@ -385,7 +396,7 @@ if __name__ == "__main__":
             g1.SetLineColor(color1)
             g1.SetLineWidth(0)
             g1.SetMarkerStyle(24)
-            g1.SetMarkerColor(ROOT.kBlue+1)
+            g1.SetMarkerColor(color0)
             g1.SetMarkerSize(2)
             g1.GetYaxis().SetRangeUser(-10,10)
 
@@ -398,7 +409,7 @@ if __name__ == "__main__":
             g2.SetFillColor(color2)
             g2.SetLineWidth(0)
             g2.SetMarkerStyle(24)
-            g2.SetMarkerColor(ROOT.kBlue+1)
+            g2.SetMarkerColor(color0)
             g2.SetMarkerSize(2)
             g2.GetYaxis().SetRangeUser(-15,15)
 
@@ -504,6 +515,9 @@ if __name__ == "__main__":
             g21.Draw("2 same")
             g11.Draw("2 same")
 
+            for item in cpm.optionals:
+                item.Draw("same")
+
             c.SetTicks()
             leg.Draw()
 
@@ -599,7 +613,7 @@ if __name__ == "__main__":
         g1.SetLineColor(color1)
         g1.SetLineWidth(0)
         g1.SetMarkerStyle(24)
-        g1.SetMarkerColor(ROOT.kBlue+1)
+        g1.SetMarkerColor(color0)
         g1.SetMarkerSize(2)
         g1.GetYaxis().SetRangeUser(-10,10)
 
@@ -612,7 +626,7 @@ if __name__ == "__main__":
         g2.SetFillColor(color2)
         g2.SetLineWidth(0)
         g2.SetMarkerStyle(24)
-        g2.SetMarkerColor(ROOT.kBlue+1)
+        g2.SetMarkerColor(color0)
         g2.SetMarkerSize(2)
         g2.GetYaxis().SetRangeUser(-15,15)
 
