@@ -46,5 +46,5 @@ For the differential distribution plots of the kinematic variables see
 
 https://github.com/UniMiBAnalyses/PlotsConfigurations/tree/master/Configurations/VBSlllnu
 
-Important Note: all the WZ ntuples are inside the hercules storage at this path (<username>@hercules.mib.infn.it):
+*Important Note*: all the WZ ntuples are inside the hercules storage at this path (<username>@hercules.mib.infn.it):
 `/gwteray/users/govoni/ntuple_WZ`
